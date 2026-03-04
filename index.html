@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>AI Mudra Recognition</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gradient-to-br from-slate-100 to-indigo-100 font-sans">
+
+<!-- Navbar -->
+<nav class="bg-indigo-600 text-white p-4 shadow-xl">
+  <div class="max-w-7xl mx-auto flex justify-between items-center">
+    <h1 class="text-xl font-bold">🖐 AI Natya Mudra Recognition</h1>
+    <span class="text-sm opacity-90">Real-Time AI Detection</span>
+  </div>
+</nav>
+
+<!-- Main -->
+<div class="max-w-7xl mx-auto p-6 grid md:grid-cols-2 gap-6">
+
+<!-- Camera -->
+<div class="bg-white rounded-2xl shadow-xl p-5">
+
+<h2 class="text-lg font-semibold mb-4">Live Camera</h2>
+
+<video id="video" class="w-full rounded-xl border-4 border-indigo-400" autoplay></video>
+
+<div class="flex gap-3 mt-4">
+<button onclick="startCamera()" class="bg-green-500 hover:bg-green-600 text-white px-5 py-2 rounded-lg">
+Start
+</button>
+
+<button onclick="stopCamera()" class="bg-red-500 hover:bg-red-600 text-white px-5 py-2 rounded-lg">
+Stop
+</button>
+</div>
+</div>
+
+<!-- Prediction -->
+<div class="bg-white rounded-2xl shadow-xl p-5 text-center">
+
+<h2 class="text-lg font-semibold mb-4">Detected Mudra</h2>
+
+<h1 id="result" class="text-4xl font-bold text-indigo-600 mb-3">
+Waiting...
+</h1>
+
+<div class="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
+<div id="bar" class="bg-indigo-600 h-4 w-0 transition-all"></div>
+</div>
+
+<p id="confidence" class="mt-2 text-gray-600"></p>
+
+</div>
+</div>
+
+<!-- About -->
+<div class="max-w-7xl mx-auto px-6 pb-10">
+<div class="bg-white rounded-2xl shadow-xl p-6">
+
+<h2 class="text-xl font-semibold mb-3">About System</h2>
+
+<p class="text-gray-600 leading-relaxed">
+This AI-powered system recognizes Bharatiya Natya Mudras in real time using computer vision and machine learning. 
+It extracts hand landmarks, processes them through an intelligent model, and predicts gestures instantly.
+</p>
+
+</div>
+</div>
+
+<script>
+
+let stream;
+let interval;
+
+async function startCamera() {
+  const video = document.getElementById("video");
+  stream = await navigator.mediaDevices.getUserMedia({ video: true });
+  video.srcObject = stream;
+
+  interval = setInterval(sendFrame, 700);
+}
+
+function stopCamera() {
+  if (stream) stream.getTracks().forEach(t => t.stop());
+  clearInterval(interval);
+}
+
+async function sendFrame() {
+  const video = document.getElementById("video");
+
+  const canvas = document.createElement("canvas");
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+
+  const ctx = canvas.getContext("2d");
+  ctx.drawImage(video, 0, 0);
+
+  const image = canvas.toDataURL("image/jpeg");
+
+  const res = await fetch("https://ai-based-bharatiya-natya-mudra.onrender.com/predict", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({ image })
+  });
+
+  const data = await res.json();
+
+  document.getElementById("result").innerText = data.label;
+
+  if (data.confidence) {
+    const percent = Math.round(data.confidence * 100);
+    document.getElementById("confidence").innerText = percent + "% confidence";
+    document.getElementById("bar").style.width = percent + "%";
+  } else {
+    document.getElementById("confidence").innerText = "";
+    document.getElementById("bar").style.width = "0%";
+  }
+}
+
+</script>
+
+</body>
+</html>

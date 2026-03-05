@@ -30,12 +30,19 @@ hands = mp_hands.Hands(
 
 CONFIDENCE_THRESHOLD = 0.55   # slightly lower for better stability
 
+<<<<<<< HEAD
 
 # -------- Prediction API --------
 @app.route("/")
 def home():
     return render_template("index.html")
 
+=======
+# -------- Prediction API --------3
+@app.route("/")
+def home():
+    return "AI Mudra Recognition API is running"
+>>>>>>> 3f9e5ce824ea9561f350482e50d8f9cbd2a86e5f
 @app.route("/predict", methods=["POST"])
 def predict():
     try:

@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 import cv2
 import mediapipe as mp
@@ -30,7 +30,12 @@ hands = mp_hands.Hands(
 
 CONFIDENCE_THRESHOLD = 0.55   # slightly lower for better stability
 
+
 # -------- Prediction API --------
+@app.route("/")
+def home():
+    return render_template("index.html")
+
 @app.route("/predict", methods=["POST"])
 def predict():
     try:

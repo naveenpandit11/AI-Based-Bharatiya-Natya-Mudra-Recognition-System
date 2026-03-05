@@ -82,7 +82,7 @@ async function startCamera() {
   stream = await navigator.mediaDevices.getUserMedia({ video: true });
   video.srcObject = stream;
 
-  interval = setInterval(sendFrame, 700);
+  interval = setInterval(sendFrame, 1000);
 }
 
 function stopCamera() {
@@ -102,24 +102,28 @@ async function sendFrame() {
 
   const image = canvas.toDataURL("image/jpeg");
 
-  const res = await fetch("https://ai-based-bharatiya-natya-mudra.onrender.com/predict", {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({ image })
-  });
+try {
 
-  const data = await res.json();
+const res = await fetch("https://ai-based-bharatiya-natya-mudra.onrender.com/predict", {
+method: "POST",
+headers: { "Content-Type": "application/json" },
+body: JSON.stringify({ image })
+});
 
-  document.getElementById("result").innerText = data.label;
+const data = await res.json();
 
-  if (data.confidence) {
-    const percent = Math.round(data.confidence * 100);
-    document.getElementById("confidence").innerText = percent + "% confidence";
-    document.getElementById("bar").style.width = percent + "%";
-  } else {
-    document.getElementById("confidence").innerText = "";
-    document.getElementById("bar").style.width = "0%";
-  }
+document.getElementById("result").innerText = data.label || "Unknown";
+
+if (data.confidence) {
+const percent = Math.round(data.confidence * 100);
+document.getElementById("confidence").innerText = percent + "% confidence";
+document.getElementById("bar").style.width = percent + "%";
+}
+
+} catch (err) {
+console.error(err);
+document.getElementById("result").innerText = "Server Error";
+}
 }
 
 </script>
